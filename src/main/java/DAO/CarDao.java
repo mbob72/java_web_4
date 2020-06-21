@@ -4,8 +4,10 @@ import model.Car;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.TransactionException;
 import org.hibernate.criterion.Restrictions;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class CarDao {
@@ -28,14 +30,18 @@ public class CarDao {
     public boolean save(Car newCar) {
         boolean res = true;
         Transaction trx = session.beginTransaction();
-        List<Car> allBrendCars = readByBrend(newCar.getBrand());
-        if (allBrendCars.size() >= 10) {
-            res = false;
-        } else {
-            session.save(newCar);
+        try {
+            List<Car> allBrendCars = readByBrend(newCar.getBrand());
+            if (allBrendCars.size() >= 10) {
+                res = false;
+            } else {
+                session.save(newCar);
+            }
+            trx.commit();
+        } catch (TransactionException e) {
+            trx.rollback();
+            return false;
         }
-        trx.commit();
-        session.close();
         return res;
     }
 
@@ -49,17 +55,22 @@ public class CarDao {
     public Car byCar(Car car) {
         Criteria criteria = session.createCriteria(Car.class);
         Transaction trx = session.beginTransaction();
-        Car baughtCar = (Car) criteria
-                .add(Restrictions.and(Restrictions.eq("brand", car.getBrand()),
-                    Restrictions.eq("model", car.getModel()),
-                    Restrictions.eq("licensePlate", car.getLicensePlate())))
-                .list()
-                .get(0);
-        if (baughtCar != null) {
-            session.delete(baughtCar);
+        Car baughtCar = null;
+        try {
+            baughtCar = (Car) criteria
+                    .add(Restrictions.and(Restrictions.eq("brand", car.getBrand()),
+                            Restrictions.eq("model", car.getModel()),
+                            Restrictions.eq("licensePlate", car.getLicensePlate())))
+                    .list()
+                    .get(0);
+            if (baughtCar != null) {
+                session.delete(baughtCar);
+            }
+            trx.commit();
+        } catch (TransactionException e) {
+            trx.rollback();
+            return null;
         }
-        trx.commit();
-        session.close();
         return baughtCar;
     }
 

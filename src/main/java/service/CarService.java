@@ -4,9 +4,11 @@ import DAO.CarDao;
 import DAO.DailyReportDao;
 import model.Car;
 import model.DailyReport;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import util.DBHelper;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +23,15 @@ public class CarService {
         return dayBurguns;
     }
     public static void resetDay() {
-        dayBurguns = new ArrayList<Car>();
+        dayBurguns = new ArrayList<>();
     }
 
     public void clearAll() {
-        new CarDao(sessionFactory.openSession()).clearAll();
+        try (CloseableSession session = new CloseableSession(sessionFactory.openSession())) {
+            new CarDao(session.getSession()).clearAll();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     private CarService(SessionFactory sessionFactory) {
@@ -40,21 +46,51 @@ public class CarService {
     }
 
     public boolean addCar(Car car) {
-        return new CarDao(sessionFactory.openSession()).save(car);
+        try (CloseableSession session = new CloseableSession( sessionFactory.openSession())) {
+            return new CarDao(session.getSession()).save(car);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean byCar(Car car) {
-        Car baughtCar = new CarDao(sessionFactory.openSession()).byCar(car);
-        if (baughtCar == null) {
+        try (CloseableSession session = new CloseableSession( sessionFactory.openSession())) {
+            Car baughtCar = new CarDao(session.getSession()).byCar(car);
+            if (baughtCar == null) {
+                return false;
+            }
+            dayBurguns.add(baughtCar);
+        } catch (Exception e) {
             return false;
         }
-        dayBurguns.add(baughtCar);
         return true;
     }
 
     public List<Car> getAllCars() {
-        return new CarDao(sessionFactory.openSession()).getAllCars();
+        try (CloseableSession session = new CloseableSession( sessionFactory.openSession())) {
+            return new CarDao(session.getSession()).getAllCars();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
+    public class CloseableSession implements AutoCloseable {
 
+        private final Session session;
+
+        public CloseableSession(Session session) {
+            this.session = session;
+        }
+
+        public Session getSession() {
+            return session;
+        }
+
+        @Override
+        public void close() {
+            session.close();
+        }
+    }
 }
+
+
