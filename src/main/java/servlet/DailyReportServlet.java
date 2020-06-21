@@ -16,13 +16,17 @@ public class DailyReportServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Gson gson = new Gson();
-        if (req.getPathInfo().contains("all")) {
-            resp.getWriter().write(gson.toJson(DailyReportService.getInstance().getAllDailyReports()));
-            resp.setStatus(200);
-        } else if (req.getPathInfo().contains("last")) {
-            resp.getWriter().write(gson.toJson(DailyReportService.getInstance().getLastReport()));
-            resp.setStatus(200);
-        } else {
+        try {
+            if (req.getPathInfo().contains("all")) {
+                resp.getWriter().write(gson.toJson(DailyReportService.getInstance().getAllDailyReports()));
+                resp.setStatus(200);
+            } else if (req.getPathInfo().contains("last")) {
+                resp.getWriter().write(gson.toJson(DailyReportService.getInstance().getLastReport()));
+                resp.setStatus(200);
+            } else {
+                resp.setStatus(403);
+            }
+        } catch (Exception e) {
             resp.setStatus(403);
         }
     }

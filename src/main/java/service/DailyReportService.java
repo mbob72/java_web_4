@@ -33,15 +33,27 @@ public class DailyReportService {
     }
 
     public List<DailyReport> getAllDailyReports() {
-        return new DailyReportDao(sessionFactory.openSession()).getAllDailyReport();
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession(sessionFactory.openSession())) {
+            return new DailyReportDao(session.getSession()).getAllDailyReport();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
 
     public DailyReport getLastReport() {
-        return new DailyReportDao(sessionFactory.openSession()).getLastReport();
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession(sessionFactory.openSession())) {
+            return new DailyReportDao(session.getSession()).getLastReport();
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
     public void makeDayReport(DailyReport dailyReport) {
-        new DailyReportDao(sessionFactory.openSession()).addReport(dailyReport);
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession(sessionFactory.openSession())) {
+            new DailyReportDao(session.getSession()).addReport(dailyReport);
+        } catch(Exception e) {
+            throw e;
+        }
     }
 }
