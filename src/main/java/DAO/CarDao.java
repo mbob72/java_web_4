@@ -19,12 +19,7 @@ public class CarDao {
     }
 
     public void clearAll() {
-        Transaction trx = session.beginTransaction();
-        final List<?> instances = session.createCriteria(Car.class).list();
-        for (Object obj : instances) {
-            session.delete(obj);
-        }
-        session.getTransaction().commit();
+        session.createQuery("DELETE FROM Car").executeUpdate();
     }
 
     public boolean save(Car newCar) {

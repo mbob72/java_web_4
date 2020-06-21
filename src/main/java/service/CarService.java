@@ -1,14 +1,11 @@
 package service;
 
 import DAO.CarDao;
-import DAO.DailyReportDao;
 import model.Car;
-import model.DailyReport;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import util.DBHelper;
 
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +24,7 @@ public class CarService {
     }
 
     public void clearAll() {
-        try (CloseableSession session = new CloseableSession(sessionFactory.openSession())) {
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession(sessionFactory.openSession())) {
             new CarDao(session.getSession()).clearAll();
         } catch (Exception e) {
             System.out.println(e);
@@ -46,7 +43,7 @@ public class CarService {
     }
 
     public boolean addCar(Car car) {
-        try (CloseableSession session = new CloseableSession( sessionFactory.openSession())) {
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession( sessionFactory.openSession())) {
             return new CarDao(session.getSession()).save(car);
         } catch (Exception e) {
             return false;
@@ -54,7 +51,7 @@ public class CarService {
     }
 
     public boolean byCar(Car car) {
-        try (CloseableSession session = new CloseableSession( sessionFactory.openSession())) {
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession( sessionFactory.openSession())) {
             Car baughtCar = new CarDao(session.getSession()).byCar(car);
             if (baughtCar == null) {
                 return false;
@@ -67,28 +64,10 @@ public class CarService {
     }
 
     public List<Car> getAllCars() {
-        try (CloseableSession session = new CloseableSession( sessionFactory.openSession())) {
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession( sessionFactory.openSession())) {
             return new CarDao(session.getSession()).getAllCars();
         } catch (Exception e) {
             return null;
-        }
-    }
-
-    public class CloseableSession implements AutoCloseable {
-
-        private final Session session;
-
-        public CloseableSession(Session session) {
-            this.session = session;
-        }
-
-        public Session getSession() {
-            return session;
-        }
-
-        @Override
-        public void close() {
-            session.close();
         }
     }
 }

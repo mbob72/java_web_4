@@ -14,7 +14,11 @@ public class DailyReportService {
     private SessionFactory sessionFactory;
 
     public void clearAll() {
-        new DailyReportDao(sessionFactory.openSession()).clearAll();
+        try (DBHelper.CloseableSession session = new DBHelper.CloseableSession(sessionFactory.openSession())) {
+            new DailyReportDao(session.getSession()).clearAll();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     private DailyReportService(SessionFactory sessionFactory) {

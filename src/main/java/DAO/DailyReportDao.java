@@ -15,12 +15,7 @@ public class DailyReportDao {
     public static long lastId;
 
     public void clearAll() {
-        Transaction trx = session.beginTransaction();
-        final List<?> instances = session.createCriteria(DailyReport.class).list();
-        for (Object obj : instances) {
-            session.delete(obj);
-        }
-        session.getTransaction().commit();
+        session.createQuery("DELETE FROM DailyReport").executeUpdate();
     }
 
     public DailyReportDao(Session session) {
